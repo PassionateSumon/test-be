@@ -1,5 +1,5 @@
 import type { ResponseToolkit } from "@hapi/hapi";
-import { statusCodes } from "src/config/constants";
+import { statusCodes } from "../config/constants";
 
 export const success = (
   data: any,

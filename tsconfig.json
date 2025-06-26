@@ -16,9 +16,6 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "baseUrl": ".",
-    "paths": {
-      "@prisma/client": ["./generated/prisma"]
-    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

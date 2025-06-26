@@ -1,5 +1,5 @@
 import type { ServerRoute } from "@hapi/hapi";
-import { filterComponents, flimActors, flimInfo, listFilms } from "src/controllers/films.controller";
+import { filterComponents, flimActors, flimInfo, listFilms } from "../controllers/films.controller";
 
 const filmsRoutes: ServerRoute[] = [
   {

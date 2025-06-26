@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -34,7 +33,7 @@ model address {
   store       store[]
 
   @@index([city_id], map: "idx_fk_city_id")
-  @@index([location(length: 32)], map: "idx_location")
+  // @@index([location(length: 32)], map: "idx_location")
 }
 
 model category {

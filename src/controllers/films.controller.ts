@@ -1,7 +1,7 @@
 import type { Request, ResponseToolkit } from "@hapi/hapi";
-import { statusCodes } from "src/config/constants";
-import { prisma } from "src/config/prisma";
-import { error, success } from "src/utils/returnFunctions";
+import { statusCodes } from "../config/constants";
+import { prisma } from "../config/prisma";
+import { error, success } from "../utils/returnFunctions";
 
 // It should list all the films with title, release year, language, length, replacement cost and rating.
 
@@ -17,24 +17,28 @@ export const listFilms = async (req: Request, h: ResponseToolkit) => {
     } = req.query as {
       page: number;
       limit: number;
-      search?: {
-        category?: string;
-        language?: string;
-        release_year?: number;
-        actor?: string;
-      };
+      search?: string;
     };
 
     // console.log(req.query)
 
-    const s = search;
-    // console.log(s)
-    var obj = eval("(" + s + ")");
+    // const s = search;
+    // // console.log(s)
+    // var obj = eval("(" + s + ")");
     // console.log(obj)
+
+    let obj: any = {};
+    if (search) {
+      try {
+        obj = JSON.parse(search);
+      } catch (err: any) {
+        return error(null, "Invalid search format!", statusCodes.BAD_REQUEST);
+      }
+    }
 
     let whereClause: any = {
       ...(obj?.category && {
-        film_category: { name: obj.category },
+        film_category: { some: { category: { name: obj.category } } },
       }),
       ...(obj?.language && {
         language_film_language_idTolanguage: { name: obj.language },
@@ -42,18 +46,20 @@ export const listFilms = async (req: Request, h: ResponseToolkit) => {
       ...(obj?.release_year && { release_year: obj.release_year }),
       ...(obj?.actor && {
         film_actor: {
-          OR: [
-            {
-              actor: {
-                first_name: { contains: obj.actor },
+          some: {
+            AND: [
+              {
+                actor: {
+                  first_name: { contains: obj.actor.split(" ")?.[0] },
+                },
               },
-            },
-            {
-              actor: {
-                last_name: { contains: obj.actor },
+              {
+                actor: {
+                  last_name: { contains: obj.actor.split(" ")?.[1] },
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       }),
     };
@@ -157,7 +163,7 @@ export const filterComponents = async (req: Request, h: ResponseToolkit) => {
       statusCodes.SUCCESS
     )(h);
   } catch (err: any) {
-    console.error("Internal error in filter-components!", err);
+console.error("Internal error in filter-components! - films.controller.ts:166", err);
     return error(
       null,
       err.message || "Internal error in filter-components!",
@@ -200,7 +206,7 @@ export const flimInfo = async (req: Request, h: ResponseToolkit) => {
 export const flimActors = async (req: Request, h: ResponseToolkit) => {
   try {
     const { id } = req.params;
-    const flimDetails = await prisma.film.findUnique({
+    const flimDetails = (await prisma.film.findUnique({
       where: {
         film_id: Number(id),
       },
@@ -216,12 +222,12 @@ export const flimActors = async (req: Request, h: ResponseToolkit) => {
           },
         },
       },
-    }) as any;
+    })) as any;
     // console.log(flimActors)
-    console.log(flimDetails.film_actor);
+console.log("", flimDetails.film_actor);
 
     return success(
-      {flimActors: flimDetails.film_actor},
+      { flimActors: flimDetails.film_actor },
       "Fetched flim actors successfully",
       statusCodes.SUCCESS
     )(h);

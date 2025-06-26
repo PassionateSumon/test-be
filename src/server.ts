@@ -5,11 +5,11 @@ import indexRoutes from "./routes/index.route";
 const init = async () => {
   const server = Hapi.server({
     port: 3030,
-    host: "localhost",
+    host: "0.0.0.0",
     routes: {
       cors: {
         origin: ["*"],
-        additionalHeaders: ["Accept", "Authorization", "If-Not_Matched"],
+        additionalHeaders: ["Accept", "Authorization", "If-Not-Matched"],
       },
       state: {
         parse: true,
@@ -20,18 +20,29 @@ const init = async () => {
 
   try {
     await prisma.$connect();
-    console.log("database connected");
+    console.log("database connected - server.ts:23");
   } catch (err: any) {
-    console.error("database connection error", err);
+    console.error("database connection error - server.ts:25", err);
   }
 
   server.route(indexRoutes);
 
   await server.start();
-  console.log(`Server is running on ${server.info.uri}`);
+  console.log(`Server is running on ${server.info.uri} - server.ts:31`);
 };
 
-process.on("unhandledRejection", () => {
+process.on("SIGINT", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("unhandledRejection", async () => {
+  await prisma.$disconnect();
   process.exit(1);
 });
 
