@@ -33,7 +33,6 @@ model address {
   store       store[]
 
   @@index([city_id], map: "idx_fk_city_id")
-  // @@index([location(length: 32)], map: "idx_location")
 }
 
 model category {
